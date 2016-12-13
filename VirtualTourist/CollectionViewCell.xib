@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11201" systemVersion="16B2555" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11161"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="CollectionViewCell" id="gTV-IL-0wX" customClass="CollectionViewCell" customModule="VirtualTourist">
+            <rect key="frame" x="0.0" y="0.0" width="241" height="128"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="241" height="128"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="IGr-5u-4qi" userLabel="containerView">
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="UrZ-BM-70i"/>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="7ks-00-Qxu">
+                                <frame key="frameInset" minX="110" minY="54" width="20" height="20"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </activityIndicatorView>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="UrZ-BM-70i" firstAttribute="leading" secondItem="IGr-5u-4qi" secondAttribute="leading" id="J7w-sG-M97"/>
+                            <constraint firstAttribute="bottom" secondItem="UrZ-BM-70i" secondAttribute="bottom" id="Yc7-hY-HMv"/>
+                            <constraint firstItem="UrZ-BM-70i" firstAttribute="top" secondItem="IGr-5u-4qi" secondAttribute="top" id="cxG-Qc-N5W"/>
+                            <constraint firstAttribute="trailing" secondItem="UrZ-BM-70i" secondAttribute="trailing" id="nug-Qc-eJg"/>
+                        </constraints>
+                    </view>
+                </subviews>
+            </view>
+            <constraints>
+                <constraint firstItem="IGr-5u-4qi" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="6ha-Wb-wcL"/>
+                <constraint firstAttribute="trailing" secondItem="IGr-5u-4qi" secondAttribute="trailing" id="CBh-gG-Oex"/>
+                <constraint firstAttribute="bottom" secondItem="IGr-5u-4qi" secondAttribute="bottom" id="Fb1-j3-hcI"/>
+                <constraint firstItem="IGr-5u-4qi" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="W0I-kn-FrW"/>
+            </constraints>
+            <size key="customSize" width="241" height="128"/>
+            <connections>
+                <outlet property="activityIndicator" destination="7ks-00-Qxu" id="aZu-bn-IsL"/>
+                <outlet property="imageView" destination="UrZ-BM-70i" id="Dke-Fh-3IE"/>
+            </connections>
+            <point key="canvasLocation" x="-142" y="307"/>
+        </collectionViewCell>
+    </objects>
+</document>
