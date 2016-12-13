@@ -15,7 +15,7 @@ class Client: NSObject {
     
     // Shared session
     var session: URLSession
-    
+    var pin : Pin!
     
     // MARK: Initializers
     
@@ -27,6 +27,8 @@ class Client: NSObject {
     // MARK: Flickr API
     
     func getPhotosFromLocation(_ coordinate: CLLocationCoordinate2D, completionHandler: @escaping ( _ photos: [[String: AnyObject]], _ errorString: String?) -> Void) {
+        
+      
         // Specify parameters
         let parameters : [String:AnyObject] = [
             Client.FlickrParameterKeys.Latitude: coordinate.latitude as AnyObject,
@@ -52,6 +54,8 @@ class Client: NSObject {
                     if let dictionary = result?[Client.FlickrResponseKeys.Photos] as? NSDictionary {
                         if let results = dictionary[Client.FlickrResponseKeys.Photo] as? [[String: AnyObject]]{
                             
+                            let numberOfPhotoPages = dictionary[Client.FlickrResponseKeys.Pages] as? Int
+                            self.pin?.pageNumber = numberOfPhotoPages as? NSNumber
                             completionHandler(results, nil)
                         } else {
                             print("Could not find \(Client.FlickrResponseKeys.Photo) in \(dictionary)")
@@ -87,6 +91,7 @@ class Client: NSObject {
         mutableParameters[FlickrParameterKeys.NoJSONCallback] = FlickrParameterValues.DisableJSONCallback as AnyObject?
         mutableParameters[FlickrParameterKeys.Page] = FlickrParameterValues.Page as AnyObject?
         mutableParameters[FlickrParameterKeys.GalleryID] = FlickrParameterValues.GalleryID as AnyObject?
+        mutableParameters[FlickrParameterKeys.Page] = FlickrParameterValues.Page as AnyObject?
         
         // Build and configure GET request
         let loginURL = Constants.baseURLSecureString + Client.escapedParameters(mutableParameters)

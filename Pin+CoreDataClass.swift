@@ -24,7 +24,7 @@ extension Pin {
     @NSManaged public var longitude: Double
     @NSManaged public var photos: Photos?
     @NSManaged public var title: String?
-    
+    @NSManaged var pageNumber: NSNumber?
     
     public var coordinate: CLLocationCoordinate2D {
         
@@ -39,7 +39,7 @@ extension Pin {
         
         latitude = annotationLatitude
         longitude = annotationLongitude
-        
+         self.pageNumber = 0
     }
    
 }

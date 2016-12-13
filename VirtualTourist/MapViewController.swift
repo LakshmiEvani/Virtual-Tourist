@@ -23,7 +23,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     var pins = [Pin]()
     var photos = [Photos]()
     var client = Client.sharedInstance()
-    
+    var numberOfPhotoDownloaded = 0
     
     //Load Map Region
     var savedRegionLoaded = false
@@ -185,6 +185,15 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     func getPicsForPin(_ pin: Pin) {
         client.getPhotosFromLocation(pin.coordinate) { (photos, errorString) in
             
+            var randomPageNumber: Int = 1
+            
+            if let numberPages = pin.pageNumber?.intValue {
+                if numberPages > 0 {
+                    let pageLimit = min(numberPages, 20)
+                    randomPageNumber = Int(arc4random_uniform(UInt32(pageLimit))) + 1 }
+            }
+             
+             self.numberOfPhotoDownloaded = photos.count
             print("The photos count in get images", photos.count)
             if let errorString = errorString {
                 print(errorString)
@@ -192,6 +201,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 for image in photos {
                     print("The image is:", image)
                     let photo = Photos(dictionary: image, pins: pin, context: self.sharedContext)
+                    self.numberOfPhotoDownloaded-=1
                     CoreDataStackController.sharedInstance().saveContext()
                 }
             }
