@@ -13,9 +13,12 @@ import CoreData
 class Client: NSObject {
     // MARK: Properties
     
+    var numberOfPhotosDownloaded = 0
+    var pin : Pin!
+    
     // Shared session
     var session: URLSession
-    var pin : Pin!
+    
     
     // MARK: Initializers
     
@@ -26,78 +29,15 @@ class Client: NSObject {
     
     // MARK: Flickr API
     
-    func getPhotosFromLocation(_ coordinate: CLLocationCoordinate2D, completionHandler: @escaping ( _ photos: [[String: AnyObject]], _ errorString: String?) -> Void) {
-        
-      
-        // Specify parameters
-        let parameters : [String:AnyObject] = [
-            Client.FlickrParameterKeys.Latitude: coordinate.latitude as AnyObject,
-            Client.FlickrParameterKeys.Longitude: coordinate.longitude as AnyObject,
-            ]
-        
-        
-        // Make the request
-        
-      taskForGetMethod(methodParameters: parameters) { (result, error) in
-        
-            print("The result is:", result?.count)
-    
-        
-            if error != nil {
-                
-                completionHandler([], "could not get results.")
-            } else {
-                
-            // Send the value(s) to the completion handler
-                if result != nil {
-                    
-                    if let dictionary = result?[Client.FlickrResponseKeys.Photos] as? NSDictionary {
-                        if let results = dictionary[Client.FlickrResponseKeys.Photo] as? [[String: AnyObject]]{
-                            
-                            let numberOfPhotoPages = dictionary[Client.FlickrResponseKeys.Pages] as? Int
-                            self.pin?.pageNumber = numberOfPhotoPages as? NSNumber
-                            completionHandler(results, nil)
-                        } else {
-                            print("Could not find \(Client.FlickrResponseKeys.Photo) in \(dictionary)")
-                            completionHandler([], "Could not get results in dict.")
-                        }
-
-                        } else {
-                        print("Could not find \(Client.FlickrResponseKeys.Photos) in \(result)")
-                        completionHandler([], "Could not get results. in result")
-                    }
-                } else {
-                    print(error)
-                    completionHandler([], "Request Failed.")
-                }
-            
-            }
-      
-        }
-        
-    }
-
-    
     //Get Method
     
-    func taskForGetMethod(methodParameters: [String:AnyObject], completionHandler: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void) -> URLSessionDataTask {
-        
-        var mutableParameters = methodParameters
-        mutableParameters[FlickrParameterKeys.Method] = method as AnyObject
-        mutableParameters[FlickrParameterKeys.Method] = FlickrParameterValues.GalleryPhotosMethod as AnyObject?
-        mutableParameters[FlickrParameterKeys.APIKey] = FlickrParameterValues.APIKey as AnyObject?
-        mutableParameters[FlickrParameterKeys.Extras] = FlickrParameterValues.Extras as AnyObject?
-        mutableParameters[FlickrParameterKeys.Format] = FlickrParameterValues.ResponseFormat as AnyObject?
-        mutableParameters[FlickrParameterKeys.NoJSONCallback] = FlickrParameterValues.DisableJSONCallback as AnyObject?
-        mutableParameters[FlickrParameterKeys.Page] = FlickrParameterValues.Page as AnyObject?
-        mutableParameters[FlickrParameterKeys.GalleryID] = FlickrParameterValues.GalleryID as AnyObject?
-        mutableParameters[FlickrParameterKeys.Page] = FlickrParameterValues.Page as AnyObject?
+    func taskForGetMethodWithParameters(methodParameters: [String:AnyObject], completionHandler: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void) -> URLSessionDataTask {
         
         // Build and configure GET request
-        let loginURL = Constants.baseURLSecureString + Client.escapedParameters(mutableParameters)
-        let url = URL(string: loginURL)
+        let urlString = Constants.baseURLSecureString + Client.escapedParameters(methodParameters)
+        let url = URL(string: urlString)
         let request = URLRequest(url: url!)
-
+        
         // Make the request
         let task = session.dataTask(with: request, completionHandler: {(data, response, error) in
             
@@ -133,7 +73,7 @@ class Client: NSObject {
             // Parse and use data
             
             Client.parseJSONWithCompletionHandler(data, completionHandler: completionHandler)
-        
+            
         })
         
         //start the request
@@ -143,23 +83,22 @@ class Client: NSObject {
     }
     
     
-    //Download photos
+    //Post Method
     
-    func downloadImages(_ imageLocation: String, completionHandlerForImageJob: @escaping (_ imageFile: Data?, _ error: NSError?) -> ()) -> URLSessionTask {
-        
+    func taskForGETMethod(_ urlString: String, completionHandler: @escaping (_ result: Data?, _ error: NSError?) -> ()) -> URLSessionTask {
         
         let sessionConfiguration = URLSessionConfiguration.default
         _ = URLSession(configuration: sessionConfiguration)
-        let request = NSMutableURLRequest(url: URL(string: imageLocation)!)
+        let request = NSMutableURLRequest(url: URL(string: urlString)!)
         
         let task = URLSession.shared.dataTask(with: request as URLRequest, completionHandler: {
             (resultData, responseString, errorString) in
             
             print("Resultdata from downloads: ",resultData)
             if let error = errorString {
-                completionHandlerForImageJob(nil, error as NSError?)
+                completionHandler(nil, error as NSError?)
             } else {
-                completionHandlerForImageJob(resultData, nil)
+                completionHandler(resultData, nil)
             }
         })
         
@@ -168,8 +107,9 @@ class Client: NSObject {
         return task
     }
     
-
-
+    
+    
+    
     /* Helper: Given raw JSON, return a usable Foundation object */
     
     class func parseJSONWithCompletionHandler(_ data: Data, completionHandler: (_ result: AnyObject?, _ error: NSError?) -> Void) {
@@ -181,7 +121,7 @@ class Client: NSObject {
             
             let userInfo = [NSLocalizedDescriptionKey: "Could not parse the data as JSON: '\(data)'"]
             completionHandler(nil, NSError(domain: "parseJSONWithCompletionHandler", code: 1, userInfo: userInfo))
-
+            
         }
         completionHandler(parsedResult, nil)
     }
@@ -218,7 +158,11 @@ class Client: NSObject {
         return Singleton.sharedInstance
     }
     
+    func openURL(_ urlString: String) {
+        let url = URL(string: urlString)
+        UIApplication.shared.openURL(url!)
+    }
     
- }
+}
 
 

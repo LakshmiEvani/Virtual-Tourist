@@ -21,7 +21,7 @@ public class Photos: NSManagedObject {
         set { Client.Caches.imageCache.storeImage(newValue, withIdentifier: id!)}
     }
     
-        //Make photo object from flickr search results
+    //Make photo object from flickr search results
     convenience init(dictionary: [String:AnyObject], pins: Pin, context: NSManagedObjectContext) {
         
         print("Count in dictionary in Photos",dictionary.count)
@@ -36,14 +36,14 @@ public class Photos: NSManagedObject {
         
     }
     
-   
+    
     //Delete the associated image file when the Photo managed object is deleted.
     
     override public func prepareForDeletion() {
-       Client.Caches.imageCache.deleteImages(id!)
+        Client.Caches.imageCache.deleteImages(id!)
     }
     
-    
+   
 }
 extension Photos {
     

@@ -12,13 +12,13 @@ import UIKit
 
 class ImageCache {
     
- private var dataCache = NSCache<AnyObject, AnyObject>()
+    private var dataCache = NSCache<AnyObject, AnyObject>()
     
     //Retrieving images
     
     func imageWithIdentifier(_ identifier: String?) -> UIImage? {
         
-            // If the identifier is nil, or empty, return nil
+        // If the identifier is nil, or empty, return nil
         
         if identifier == nil || identifier! == "" {
             return nil
@@ -26,12 +26,12 @@ class ImageCache {
         
         let path = pathForIdentifier(identifier!)
         
-          // First try the memory cache
+        // First try the memory cache
         if let image = dataCache.object(forKey: path as AnyObject) as? UIImage {
             return image
         }
         
-         // Next Try the hard drive
+        // Next Try the hard drive
         if let data = try? Data(contentsOf: URL(fileURLWithPath: path)) {
             return UIImage(data: data)
         }
@@ -55,7 +55,7 @@ class ImageCache {
             
             return
         }
-           // Otherwise, keep the image in memory
+        // Otherwise, keep the image in memory
         dataCache.setObject(image!, forKey: path as AnyObject)
         let data = UIImagePNGRepresentation(image!)
         try? data!.write(to: URL(fileURLWithPath: path), options: [.atomic])

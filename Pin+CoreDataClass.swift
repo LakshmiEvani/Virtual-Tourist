@@ -11,7 +11,7 @@ import CoreData
 import MapKit
 
 public class Pin: NSManagedObject {
-
+    
 }
 
 extension Pin {
@@ -39,8 +39,30 @@ extension Pin {
         
         latitude = annotationLatitude
         longitude = annotationLongitude
-         self.pageNumber = 0
+        self.pageNumber = 0
     }
-   
+    
+    
+    var sharedContext: NSManagedObjectContext {
+        return CoreDataStackController.sharedInstance().managedObjectContext
+        
+    }
+}
+
+// MARK: Generated accessors for photos
+extension Pin {
+    
+    @objc(addPhotosObject:)
+    @NSManaged public func addToPhotos(_ value: Photos)
+    
+    @objc(removePhotosObject:)
+    @NSManaged public func removeFromPhotos(_ value: Photos)
+    
+    @objc(addPhotos:)
+    @NSManaged public func addToPhotos(_ values: NSSet)
+    
+    @objc(removePhotos:)
+    @NSManaged public func removeFromPhotos(_ values: NSSet)
+    
 }
 

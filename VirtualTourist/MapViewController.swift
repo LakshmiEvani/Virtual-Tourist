@@ -183,25 +183,13 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     //Get images for pin
     
     func getPicsForPin(_ pin: Pin) {
-        client.getPhotosFromLocation(pin.coordinate) { (photos, errorString) in
-            
-            var randomPageNumber: Int = 1
-            
-            if let numberPages = pin.pageNumber?.intValue {
-                if numberPages > 0 {
-                    let pageLimit = min(numberPages, 20)
-                    randomPageNumber = Int(arc4random_uniform(UInt32(pageLimit))) + 1 }
-            }
-             
-             self.numberOfPhotoDownloaded = photos.count
-            print("The photos count in get images", photos.count)
+        client.getPhotosFromLocation(pin: pin) { (photos, errorString) in
             if let errorString = errorString {
                 print(errorString)
             } else {
                 for image in photos {
                     print("The image is:", image)
                     let photo = Photos(dictionary: image, pins: pin, context: self.sharedContext)
-                    self.numberOfPhotoDownloaded-=1
                     CoreDataStackController.sharedInstance().saveContext()
                 }
             }
@@ -227,11 +215,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
     }
     
-    // MARK: - MKMapViewDelegate
+    // MKMapViewDelegate
     
-    // Here we create a view with a "right callout accessory view". You might choose to look into other
-    // decoration alternatives. Notice the similarity between this method and the cellForRowAtIndexPath
-    // method in TableViewDataSource.
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         
@@ -253,27 +238,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         return pinView
     }
     
-    // This delegate method is implemented to respond to taps. It opens the system browser
-    // to the URL specified in the annotationViews
-    
-    /*    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-     
-     
-     print("calloutAccessoryControlTapped")
-     if control == view.rightCalloutAccessoryView {
-     // Flickr images on callout
-     
-     self.performSegue(withIdentifier: "pinGallery", sender: view)
-     CoreDataStackController.sharedInstance().saveContext()
-     } else {
-     let pin = view.annotation as! Pin
-     mapView.removeAnnotation(view.annotation!)
-     sharedContext.delete(pin)
-     print("The Pin is deleted")
-     CoreDataStackController.sharedInstance().saveContext()
-     
-     }
-     }*/
     
     // This delegate method is implemented to respond to taps on the pin annotation.
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
@@ -294,46 +258,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             }
         }
     }
-    
-    
-    /*   do {
-     
-     let latitude = view.annotation?.coordinate.latitude
-     let longitude = view.annotation?.coordinate.longitude
-     
-     // Create Fetch Request
-     let pinfetchRequest : NSFetchRequest<Pin> = NSFetchRequest(entityName: "Pin")
-     pinfetchRequest.sortDescriptors = [NSSortDescriptor(key: "photos", ascending: true)]
-     
-     let predicate = NSPredicate(format: "latitude == %@ AND longitude == %@", argumentArray: [latitude, longitude])
-     pinfetchRequest.predicate = predicate
-     
-     
-     var pin = try sharedContext.fetch(pinfetchRequest) as? [Pin]
-     pins = [pin![0]]
-     
-     } catch {
-     
-     print("failed to get pin by object id")
-     return
-     }
-     
-     guard !self.isEditing else {
-     mapView.removeAnnotation(view.annotation!)
-     sharedContext.delete(pin)
-     CoreDataStackController.sharedInstance().saveContext()
-     return
-     }
-     
-     let controller = storyboard!.instantiateViewController(withIdentifier: "CollectionViewController") as! CollectionViewController
-     controller.mapView = mapView
-     controller.imagePin = pin
-     self.performSegue(withIdentifier: "pinGallery", sender: pin)
-     
-     
-     */
-    
-    
     
     // Error help function
     func showAlert(_ alertTitle: String, alertMessage: String, actionTitle: String){
