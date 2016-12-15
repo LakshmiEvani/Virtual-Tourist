@@ -180,55 +180,75 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         self.collectionView?.reloadData()
     }
     
-    
+    func refreshCollection(){
+        
+        imagePhotos = []
+        sharedContext.perform{
+            if self.imagePin.photos == nil {
+                self.collectionView.alpha = 1.0
+                self.imageInfoLabel.text = "No Images Found"
+                self.imageInfoLabel.isHidden = false
+                
+            } else {
+                self.collectionView.alpha = 0.0
+                self.imageInfoLabel.isHidden = true
+                
+                let pin = self.imagePin.photos as? NSSet
+                for image in pin! {
+                    self.imagePhotos.append(image as! Photos)
+                }
+                DispatchQueue.main.async {
+                    self.collectionView.reloadData()
+                }
+            }
+        }
+    }
+
     @IBAction func newCollectionButtonAction(_ sender: AnyObject) {
+        
+        newCollectionButton.isEnabled = false
         
         let pics = fetchedResultsController?.fetchedObjects
         
         for pic in pics! {
             
-            if pic.pin == nil {
+            if pic.pin != nil {
                 
                 deletePhotos()
                 
                 print("Photos deleted")
+                // Empty the array after deletion
+                CoreDataStackController.sharedInstance().saveContext()
             }
         }
-        
-        self.newCollectionButton.isEnabled = false
-        
-        collectionView?.reloadData()
-        
-        client.getPhotosFromLocation(pin: imagePin) { (photos, errorString) in
+        DispatchQueue.main.async {
+            self.refreshCollection()
+        }
+        client.getPhotosFromLocation(pin: imagePin) {(photos, errorString) in
             
-            // check for failure
-            guard errorString == nil else {
+            if errorString == nil {
                 print(errorString)
                 return
-            }
-            // populate photos for pin
-            
-            for photo in photos {
-                DispatchQueue.main.async {
-                    
-                    Photos(dictionary: photo, pins: self.imagePin, context: self.sharedContext)
-                    
-                }
+            } else {
                 
-                DispatchQueue.main.async {
+                for photo in photos {
                     
-                    if self.imagePhotos.count == 0 {
-                        self.imageInfoLabel.text = "No Images Found"
-                        self.imageInfoLabel.isHidden = false
-                    } else {
-                        self.imageInfoLabel.isHidden = true
+                    DispatchQueue.main.async {
+                        
+                        Client.Caches.imageCache.imageWithIdentifier(photo.description)
+                        CoreDataStackController.sharedInstance().saveContext()
                     }
-                    self.collectionView?.reloadData()
                     
+                    
+                    DispatchQueue.main.async (execute: {
+                        
+                        self.refreshCollection()
+                        self.newCollectionButton.isEnabled = true
+                    })
                 }
             }
+            
         }
-        
     }
     func setMapViewAnnotation(_ annotation: MKAnnotation) {
         self.annotation = annotation;

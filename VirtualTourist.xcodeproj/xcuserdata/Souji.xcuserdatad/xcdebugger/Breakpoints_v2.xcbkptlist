@@ -162,11 +162,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "VirtualTourist/CollectionViewController.swift"
-            timestampString = "503460066.121526"
+            timestampString = "503463774.547069"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "540"
-            endingLineNumber = "540">
+            startingLineNumber = "560"
+            endingLineNumber = "560">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
