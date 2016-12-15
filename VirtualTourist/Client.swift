@@ -31,7 +31,7 @@ class Client: NSObject {
     
     //Get Method
     
-    func taskForGetMethodWithParameters(methodParameters: [String:AnyObject], completionHandler: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void) -> URLSessionDataTask {
+    func taskForGetMethodWithParameters(methodParameters: [String:AnyObject], completionHandler: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void) {
         
         // Build and configure GET request
         let urlString = Constants.baseURLSecureString + Client.escapedParameters(methodParameters)
@@ -78,8 +78,6 @@ class Client: NSObject {
         
         //start the request
         task.resume()
-        return task
-        
     }
     
     
@@ -92,14 +90,14 @@ class Client: NSObject {
         let request = NSMutableURLRequest(url: URL(string: urlString)!)
         
         let task = URLSession.shared.dataTask(with: request as URLRequest, completionHandler: {
-            (resultData, responseString, errorString) in
-            
-            print("Resultdata from downloads: ",resultData)
-            if let error = errorString {
-                completionHandler(nil, error as NSError?)
-            } else {
-                completionHandler(resultData, nil)
-            }
+        (resultData, responseString, errorString) in
+        
+        print("Resultdata from downloads: ",resultData)
+        if let error = errorString {
+        completionHandler(nil, error as NSError?)
+        } else {
+        completionHandler(resultData, nil)
+        }
         })
         
         task.resume()

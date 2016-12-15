@@ -44,7 +44,9 @@ extension Client {
             results, error in
             
             if let error = error {
-                completionHandler([], "Could not get results. in result")            } else {
+                completionHandler([], "Could not get results. in result")
+            
+            } else {
                 
                 // Response dictionary
                 if let photosDictionary = results?.value(forKey: FlickrResponseKeys.Photos) as? [String: AnyObject],
@@ -70,7 +72,7 @@ extension Client {
         
                             
                             // Posting NSNotifications
-                            NotificationCenter.default.post(name: Notification.Name(rawValue: "downloadPhotoImage.done"), object: nil)
+                            NotificationCenter.default.post(name: Notification.Name(rawValue:"downloadPhotoImage.done"), object: nil)
                             
                             // Save the context
                             DispatchQueue.main.async(execute: {
@@ -93,34 +95,19 @@ extension Client {
     // Download save image and change file path for photo
     func downloadPhotoImage(_ photo: Photos, completionHandler: @escaping (_ imageData:Data?, _ error:NSError?) -> Void) {
         
-        let imageURLString = photo.url
+        let imageURLString = photo.url!
         
         // Make GET request for download photo by url
         
-        taskForGETMethod(imageURLString!, completionHandler: { (result, error) in
-            
-            // If there is an error - set file path to error to show blank image
-            if let error = error {
-                print("Error from downloading images \(error.localizedDescription )")
-                completionHandler(nil, error)
+        taskForGETMethod(imageURLString, completionHandler: { (result, error) in
+        
+                // check for failure
+                guard error == nil else {
+                    completionHandler(nil, error)
+                    return
+                }
                 
-            } else {
-                
-                // Get file name and file url
-                let fileName = (imageURLString! as NSString).lastPathComponent
-                let dirPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-                let pathArray = [dirPath, fileName]
-                let fileURL = NSURL.fileURL(withPathComponents: pathArray)!
-                //print(fileURL)
-                
-                // Save file
-                FileManager.default.createFile(atPath: fileURL.path, contents: result, attributes: nil)
-                
-                // Update the Photos model
-                photo.url = fileURL.path
                 completionHandler(result, nil)
-
-            }
         })
     }
     
