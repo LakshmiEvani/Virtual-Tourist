@@ -142,14 +142,15 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         } else {
             cell.imageView.image = UIImage(named: "placeholder")
             client.getPhotosFromLocation(pin: imagePin, completionHandler: { (photos, error) in
-                if photos != nil {
-                    
+                if error != nil {
+                    print(photos)
                     for photo in photos {
                     DispatchQueue.main.async(execute: { () -> Void in
                         let photodesc = URL(string: (photo.description))
                         let imageData = try? Data(contentsOf: photodesc!)
                         self.photoImageView = UIImageView(image: UIImage(data: imageData!)!)
                         cell.imageView.image = self.photoImageView.image
+                         Client.Caches.imageCache.storeImage(self.photoImageView.image, withIdentifier: (photoObject.id)!)
                         cell.activityIndicator.isHidden = true
                         cell.activityIndicator.stopAnimating()
                         cell.imageView.isHidden = false
@@ -216,7 +217,34 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         
     }
     
+    func refreshCollection(){
+        
+        imagePhotos = []
+        sharedContext.perform{
+            if self.imagePin.photos == nil {
+                self.collectionView.alpha = 1.0
+                self.imageInfoLabel.text = "No Images Found"
+                self.imageInfoLabel.isHidden = false
+
+            } else {
+                self.collectionView.alpha = 0.0
+                self.imageInfoLabel.isHidden = true
+                
+                let pin = self.imagePin.photos as? NSSet
+                for image in pin! {
+                    self.imagePhotos.append(image as! Photos)
+                }
+                DispatchQueue.main.async {
+                    self.collectionView.reloadData()
+                }
+            }
+        }
+    }
+
+    
     @IBAction func newCollectionButtonAction(_ sender: AnyObject) {
+        
+        newCollectionButton.isEnabled = false
         
         let pics = fetchedResultsController?.fetchedObjects
         
@@ -230,49 +258,32 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
                 // Empty the array after deletion
                 CoreDataStackController.sharedInstance().saveContext()
             }
-            self.collectionView?.reloadData()
         }
-        
-        
-        reFetchPin()
-        client.getPhotosFromLocation(pin: imagePin) {(result, error) in
+         DispatchQueue.main.async {
+         self.collectionView?.reloadData()
+        }
+        client.getPhotosFromLocation(pin: imagePin) {(photos, errorString) in
             
-            if error == nil {
-                print(error)
+            if errorString == nil {
+                print(errorString)
                 return
             } else {
                 
-                DispatchQueue.main.async(execute: {
+                for photo in photos {
                     
+                    DispatchQueue.main.async {
+    
+                    Client.Caches.imageCache.imageWithIdentifier(photo.description)
                     CoreDataStackController.sharedInstance().saveContext()
-                    
-                })
-                if self.imagePin.photos == nil {
-                    
-                    self.newCollectionButton.isEnabled = false
-                    self.imageInfoLabel.isHidden = false
-                    self.imageInfoLabel.text = "No Images Found"
-                }    else {
-                    
-                    // Changing different page number
-                    
-                    var setPage = self.imagePin.pageNumber
-                    var int : Int = Int(setPage!)
-                    int += 1
-                    setPage = NSNumber(value: int)
-                    self.imagePin.pageNumber = setPage
-                    
+                    }
+                
+    
                     DispatchQueue.main.async (execute: {
-                        if self.imagePhotos.count == 0 {
-                            self.imageInfoLabel.text = "No Images Found"
-                            self.imageInfoLabel.isHidden = false
-                        } else {
-                            self.imageInfoLabel.isHidden = true
-                        }
+                        
                         self.collectionView.reloadData()
                         self.newCollectionButton.isEnabled = true
                     })
-                }
+                    }
             }
             
         }

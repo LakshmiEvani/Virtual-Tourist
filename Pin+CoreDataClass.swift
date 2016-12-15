@@ -12,20 +12,6 @@ import MapKit
 
 public class Pin: NSManagedObject {
     
-}
-
-extension Pin {
-    
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<Pin> {
-        return NSFetchRequest<Pin>(entityName: "Pin");
-    }
-    
-    @NSManaged public var latitude: Double
-    @NSManaged public var longitude: Double
-    @NSManaged public var photos: Photos?
-    @NSManaged public var title: String?
-    @NSManaged var pageNumber: NSNumber?
-    
     public var coordinate: CLLocationCoordinate2D {
         
         return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
@@ -47,6 +33,21 @@ extension Pin {
         return CoreDataStackController.sharedInstance().managedObjectContext
         
     }
+}
+
+extension Pin {
+    
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<Pin> {
+        return NSFetchRequest<Pin>(entityName: "Pin");
+    }
+    
+    @NSManaged public var latitude: Double
+    @NSManaged public var longitude: Double
+    @NSManaged public var photos: Photos?
+    @NSManaged public var title: String?
+    @NSManaged var pageNumber: NSNumber?
+    
+   
 }
 
 // MARK: Generated accessors for photos
