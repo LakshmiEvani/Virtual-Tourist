@@ -73,27 +73,17 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         fetchedResultsController.delegate = self
         
     }
-    
-    
-    /*override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        if imagePin != nil && imagePin.photos == nil {
-            newCollectionButton.isEnabled = false
-            //   fetchPhotos()
-        }
-        
-        collectionView.reloadData()
-    }
-    */
+
     
     //initializing map
     func initMap(){
         
         let annotation = MKPointAnnotation()
-        annotation.coordinate = CLLocationCoordinate2D(latitude: self.imagePin.latitude, longitude: self.imagePin.longitude)
-        annotation.title = self.imagePin.title
-        DispatchQueue.main.async {
+        
+        
+         DispatchQueue.main.async {
+            annotation.coordinate = CLLocationCoordinate2D(latitude: self.imagePin.latitude, longitude: self.imagePin.longitude)
+            annotation.title = self.imagePin.title
             self.mapView.centerCoordinate = annotation.coordinate
             self.mapView.addAnnotation(annotation)
         }
@@ -126,7 +116,7 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as! CollectionViewCell
         //Cleaning the cell
         //  self.collectionView.deleteItems(at: [indexPath])
-        //        configureCell(cell: cell, indexPath: indexPath)
+        // configureCell(cell: cell, indexPath: indexPath)
         let photoObject = (fetchedResultsController?.object(at: indexPath))! as Photos
         print("The photos in photoobject are: ",photoObject)
         
@@ -142,7 +132,7 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         } else {
             cell.imageView.image = UIImage(named: "placeholder")
             client.downloadPhotoImage((photoObject), completionHandler: { (data, error) in
-                
+                if data != nil {
                 DispatchQueue.main.async(execute: { () -> Void in
                     let image = UIImage(data: data!)
                     cell.imageView.image = image
@@ -151,7 +141,10 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
                     cell.activityIndicator.stopAnimating()
                     cell.imageView.isHidden = false
                 })
-                
+                } else {
+                    
+                    print("There is no data",error)
+                }
             })
         }
         
@@ -180,6 +173,8 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         self.collectionView?.reloadData()
     }
     
+   
+    
     func refreshCollection(){
         
         imagePhotos = []
@@ -192,7 +187,7 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
             } else {
                 self.collectionView.alpha = 0.0
                 self.imageInfoLabel.isHidden = true
-                
+
                 let pin = self.imagePin.photos as? NSSet
                 for image in pin! {
                     self.imagePhotos.append(image as! Photos)
@@ -221,15 +216,20 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
                 CoreDataStackController.sharedInstance().saveContext()
             }
         }
+
         DispatchQueue.main.async {
             self.refreshCollection()
         }
+        
+        
         client.getPhotosFromLocation(pin: imagePin) {(photos, errorString) in
-            
+         
             if errorString == nil {
                 print(errorString)
                 return
             } else {
+                
+                
                 
                 for photo in photos {
                     

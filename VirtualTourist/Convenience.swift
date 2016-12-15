@@ -66,19 +66,6 @@ extension Client {
                         let newPhoto = Photos(dictionary: photoDictionary, pins: pin, context: self.sharedContext)
                         
         
-                        // Download photo by url
-                        self.downloadPhotoImage(newPhoto, completionHandler: {
-                            success, error in
-        
-                            
-                            // Posting NSNotifications
-                            NotificationCenter.default.post(name: Notification.Name(rawValue:"downloadPhotoImage.done"), object: nil)
-                            
-                            // Save the context
-                            DispatchQueue.main.async(execute: {
-                                CoreDataStackController.sharedInstance().saveContext()
-                            })
-                        })
                     }
                     
                     completionHandler(photosArray, nil)
@@ -92,14 +79,14 @@ extension Client {
 
     }
     
-    // Download save image and change file path for photo
+    // Download save image
     func downloadPhotoImage(_ photo: Photos, completionHandler: @escaping (_ imageData:Data?, _ error:NSError?) -> Void) {
         
-        let imageURLString = photo.url!
+        let imageURLString = photo.url
         
         // Make GET request for download photo by url
         
-        taskForGETMethod(imageURLString, completionHandler: { (result, error) in
+        taskForGETMethod(imageURLString!, completionHandler: { (result, error) in
         
                 // check for failure
                 guard error == nil else {
