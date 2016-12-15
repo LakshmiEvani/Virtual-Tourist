@@ -51,45 +51,51 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         //TODO: Implement flowLayout here.
         flowLayOut(size: self.view.frame.size)
         
-        
-        let nib = UINib(nibName: "CollectionViewCell", bundle: nil)
-        collectionView.register(nib, forCellWithReuseIdentifier: "CollectionViewCell")
-        
+        if imagePin.photos != nil {
+            let nib = UINib(nibName: "CollectionViewCell", bundle: nil)
+            collectionView.register(nib, forCellWithReuseIdentifier: "CollectionViewCell")
+        }
         
         let fetchRequest: NSFetchRequest<Photos> =  Photos.fetchRequest()
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "pin", ascending: true)]
         
         // limit the fetch to photos associated with the pin
         fetchRequest.predicate = NSPredicate(format: "pin == %@", self.imagePin);
-        
         // Create the Fetched Results Controller
         fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: sharedContext, sectionNameKeyPath: nil, cacheName: nil)
-        do {
-            try fetchedResultsController.performFetch()
-            
-            print("fetchedResultsController after perform fetch",fetchedResultsController.fetchedObjects?.count)
-        } catch {
-            fatalError("Failed to initialize FetchedResultsController: \(error)")
-        }
+        perFormFetch()
         fetchedResultsController.delegate = self
         
     }
-
+    
     
     //initializing map
     func initMap(){
         
         let annotation = MKPointAnnotation()
+        annotation.coordinate = CLLocationCoordinate2D(latitude: self.imagePin.latitude, longitude: self.imagePin.longitude)
         
-        
-         DispatchQueue.main.async {
-            annotation.coordinate = CLLocationCoordinate2D(latitude: self.imagePin.latitude, longitude: self.imagePin.longitude)
+        DispatchQueue.main.async {
             annotation.title = self.imagePin.title
+            
             self.mapView.centerCoordinate = annotation.coordinate
             self.mapView.addAnnotation(annotation)
+            
+            // Display title of the annotation
+            self.mapView.selectAnnotation(annotation, animated: true)
         }
     }
     
+    
+    func perFormFetch() {
+        do {
+            try fetchedResultsController.performFetch()
+            
+        } catch {
+            fatalError("Failed to initialize FetchedResultsController: \(error)")
+        }
+        
+    }
     
     func flowLayOut(size:CGSize){
         
@@ -139,17 +145,17 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
             cell.imageView.image = UIImage(named: "placeholder")
             client.downloadPhotoImage((photoObject), completionHandler: { (data, error) in
                 if data != nil {
-                DispatchQueue.main.async(execute: { () -> Void in
-                    let image = UIImage(data: data!)
-                    cell.imageView.image = image
-                    Client.Caches.imageCache.storeImage(image, withIdentifier: (photoObject.id)!)
-                    cell.activityIndicator.isHidden = true
-                    cell.activityIndicator.stopAnimating()
-                    cell.imageView.isHidden = false
-                })
+                    DispatchQueue.main.async(execute: { () -> Void in
+                        let image = UIImage(data: data!)
+                        cell.imageView.image = image
+                        Client.Caches.imageCache.storeImage(image, withIdentifier: (photoObject.id)!)
+                        cell.activityIndicator.isHidden = true
+                        cell.activityIndicator.stopAnimating()
+                        cell.imageView.isHidden = false
+                    })
                 } else {
                     
-                    print("There is no data",error)
+                    print("There is no data",error as Any)
                 }
             })
         }
@@ -168,90 +174,70 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
     
     
     // methods for retaining new set of images
-    func deletePhotos() {
-        
-        for photo in fetchedResultsController.fetchedObjects! {
-            sharedContext.delete(photo)
-            Client.Caches.imageCache.deleteImages(photo.id!)
-            CoreDataStackController.sharedInstance().saveContext()
-        }
-        
-        self.collectionView?.reloadData()
-    }
-    
-   
     
     func refreshCollection(){
         
-        sharedContext.perform{
-            if self.imagePin.photos == nil {
-                self.collectionView.alpha = 1.0
-                self.imageInfoLabel.text = "No Images Found"
-                self.imageInfoLabel.isHidden = false
-                
-            } else {
-                self.collectionView.alpha = 0.0
-                self.imageInfoLabel.isHidden = true
-
-            }
+        if self.imagePin.photos == nil {
+            self.collectionView.alpha = 1.0
+            self.imageInfoLabel.text = "No Images Found"
+            self.imageInfoLabel.isHidden = false
+            
+        } else {
+            self.collectionView.alpha = 0.0
+            self.imageInfoLabel.isHidden = true
+            self.collectionView.reloadData()
         }
     }
-
+    
     @IBAction func newCollectionButtonAction(_ sender: AnyObject) {
         
         newCollectionButton.isEnabled = false
         
         let pics = fetchedResultsController?.fetchedObjects
-        
         for pic in pics! {
             
             if pic.pin != nil {
                 
-                deletePhotos()
-                
+                sharedContext.delete(pic)
+                Client.Caches.imageCache.deleteImages(pic.id!)
                 print("Photos deleted")
-                // Empty the array after deletion
                 CoreDataStackController.sharedInstance().saveContext()
             }
+            
         }
-
-        DispatchQueue.main.async {
-            self.collectionView.reloadData()
-        }
-        
+        self.refreshCollection()
+        self.collectionView.reloadData()
+     
         client.getPhotosFromLocation(pin: imagePin) {(photos, errorString) in
-         
+            
             if errorString == nil {
-                print(errorString)
+                print("There are no photos")
                 return
             } else {
                 
                 for photo in photos {
                     
-                    DispatchQueue.main.async {
-                        
-                        Client.Caches.imageCache.imageWithIdentifier(photo.description)
-                        CoreDataStackController.sharedInstance().saveContext()
-                    }
                     
-                    DispatchQueue.main.async (execute: {
-                        
-                        self.collectionView.reloadData()
+                    Client.Caches.imageCache.imageWithIdentifier(photo.description)
+                    CoreDataStackController.sharedInstance().saveContext()
                     
-                        self.newCollectionButton.isEnabled = true
-                    })
                 }
+                    self.collectionView.reloadData()
+                    self.refreshCollection()
+                    self.newCollectionButton.isEnabled = true
+                
             }
             
         }
     }
+    
     func setMapViewAnnotation(_ annotation: MKAnnotation) {
         self.annotation = annotation;
     }
     
     //Communicating data changes to the collection view
     
-    func controllerWillChangeContent(controller: NSFetchedResultsController<NSFetchRequestResult>) {
+    private func controllerWillChangeContent(controller: NSFetchedResultsController<NSFetchRequestResult>) {
         insertedIndexPaths = [IndexPath]()
         deletedIndexPaths = [IndexPath]()
         updatedIndexPaths = [IndexPath]()
@@ -270,7 +256,7 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         }
     }
     
-    func controller(controller: NSFetchedResultsController<NSFetchRequestResult>, didChangeObject anObject: AnyObject, atIndexPath indexPath: IndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+    private func controller(controller: NSFetchedResultsController<NSFetchRequestResult>, didChangeObject anObject: AnyObject, atIndexPath indexPath: IndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         
         switch type {
         case .insert:
@@ -288,7 +274,7 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         }
     }
     
-    func controllerDidChangeContent(controller: NSFetchedResultsController<NSFetchRequestResult>) {
+    private func controllerDidChangeContent(controller: NSFetchedResultsController<NSFetchRequestResult>) {
         
         print("in controllerDidChangeContent. changes.count: \(insertedIndexPaths.count + deletedIndexPaths.count)")
         collectionView.performBatchUpdates({() -> Void in
@@ -305,7 +291,7 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
                 self.collectionView.reloadItems(at: [indexPath])
             }
             
-            }, completion: nil)
+        }, completion: nil)
         
     }
     

@@ -36,7 +36,8 @@ extension Client {
             FlickrParameterKeys.Page : randomPageNumber as AnyObject,
             FlickrParameterKeys.GalleryID : FlickrParameterValues.GalleryID as AnyObject,
             FlickrParameterKeys.Latitude: pin.latitude as AnyObject,
-            FlickrParameterKeys.Longitude: pin.longitude as AnyObject
+            FlickrParameterKeys.Longitude: pin.longitude as AnyObject,
+            FlickrParameterKeys.PerPage : 15 as AnyObject
             ]
         
         

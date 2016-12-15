@@ -35,7 +35,7 @@ extension Client {
         static let Page = "page"
         static let Latitude = "lat"
         static let Longitude = "lon"
-        static let PerPage = 1
+        static let PerPage = "per_page"
     }
     
     // MARK: Flickr Parameter Values
@@ -48,7 +48,6 @@ extension Client {
         static let GalleryID = "6065-72157617483228192"
         static let Extras = "url_m"
         static let Page = "page"
-        
     }
     
     // MARK: Flickr Response Keys
