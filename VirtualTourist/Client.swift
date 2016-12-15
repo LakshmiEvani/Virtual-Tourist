@@ -96,7 +96,7 @@ class Client: NSObject {
         if let error = errorString {
         completionHandler(nil, error as NSError?)
         } else {
-        completionHandler(resultData, nil)
+        completionHandler(resultData!, nil)
         }
         })
         
