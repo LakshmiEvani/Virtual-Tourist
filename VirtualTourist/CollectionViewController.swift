@@ -53,7 +53,12 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         
         if imagePin.photos != nil {
             
+            imageInfoLabel.isHidden = true
+            
             subView()
+        } else {
+            imageInfoLabel.isHidden = false
+            
         }
         
         let fetchRequest: NSFetchRequest<Photos> =  Photos.fetchRequest()
@@ -178,25 +183,6 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
     
     
     // methods for retaining new set of images
-    
-    func refreshCollection(){
-        
-        DispatchQueue.main.async {
-            
-            if self.imagePin.photos == nil {
-                self.collectionView.alpha = 1.0
-                self.imageInfoLabel.text = "No Images Found"
-                self.imageInfoLabel.isHidden = false
-                
-            } else {
-                self.collectionView.alpha = 0.0
-                self.imageInfoLabel.isHidden = true
-                self.collectionView.reloadData()
-                self.subView()
-            }
-        }
-    }
-    
     
     func downloadPhotos(){
         client.getPhotosFromLocation(pin: imagePin) { (photos, errorString) in

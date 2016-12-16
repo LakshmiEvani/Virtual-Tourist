@@ -258,11 +258,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "VirtualTourist/CollectionViewController.swift"
-            timestampString = "503601046.949544"
+            timestampString = "503608518.55425"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "221"
-            endingLineNumber = "221"
+            startingLineNumber = "202"
+            endingLineNumber = "202"
             landmarkName = "newCollectionButtonAction(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -306,11 +306,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "VirtualTourist/CollectionViewController.swift"
-            timestampString = "503601906.305107"
+            timestampString = "503608518.55425"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "248"
-            endingLineNumber = "248"
+            startingLineNumber = "229"
+            endingLineNumber = "229"
             landmarkName = "newCollectionButtonAction(_:)"
             landmarkType = "7">
          </BreakpointContent>
