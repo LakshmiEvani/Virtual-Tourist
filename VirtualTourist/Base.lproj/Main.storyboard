@@ -163,7 +163,7 @@
                     <connections>
                         <outlet property="collectionView" destination="NBY-2G-uSh" id="ssq-Pp-iWf"/>
                         <outlet property="flowLayout" destination="dVh-1g-Rag" id="Cwn-l9-9r9"/>
-                        <outlet property="imageInfoLabel" destination="xrn-KM-T2c" id="eMD-Et-Ngs"/>
+                        <outlet property="imageInfoLabel" destination="xrn-KM-T2c" id="Y9g-M4-8CA"/>
                         <outlet property="mapView" destination="kZQ-kr-0a4" id="NFs-yj-dVc"/>
                         <outlet property="newCollectionButton" destination="wXz-HE-9yl" id="drR-ro-JZp"/>
                     </connections>

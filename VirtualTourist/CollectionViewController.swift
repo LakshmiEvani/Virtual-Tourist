@@ -52,12 +52,8 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         flowLayOut(size: self.view.frame.size)
         
         if imagePin.photos != nil {
-            
-            imageInfoLabel.isHidden = true
-            
             subView()
-        } else {
-            imageInfoLabel.isHidden = false
+            imageInfoLabel.isHidden = true
             
         }
         
@@ -127,7 +123,9 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
+        imageInfoLabel.isHidden = fetchedResultsController.fetchedObjects?.count != 0
         return fetchedResultsController?.fetchedObjects?.count ?? 0
+        
         
     }
     
@@ -189,13 +187,11 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
             if let errorString = errorString {
                 print(errorString)
             } else {
-                
-                DispatchQueue.main.async {
+            
                     for image in photos {
                         print("The image in New Collection:", image)
                         let photo = Photos(dictionary: image, pins: self.imagePin, context: self.sharedContext)
                         CoreDataStackController.sharedInstance().saveContext()
-                    }
                 }
             }
             
@@ -218,19 +214,20 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
             }
             
         }
-        downloadPhotos()
         
-        
+        DispatchQueue.main.async {
+            self.downloadPhotos()
+            }
         DispatchQueue.main.async {
             
             self.perFormFetch()
             if self.imagePin.photos == nil {
-                self.imageInfoLabel.text = "No Images Found"
+               // self.imageInfoLabel.text = "No Images Found"
                 print("No images Found")
-                self.imageInfoLabel.isHidden = false
+                self.imageInfoLabel.isHidden = true
                 
             } else {
-                self.imageInfoLabel.isHidden = true
+                self.imageInfoLabel.isHidden = false
                 print("Images found in Collection")
                 self.collectionView.reloadData()
                 print("Reloaded collection View")
