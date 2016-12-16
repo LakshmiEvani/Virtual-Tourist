@@ -90,6 +90,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         var result = [Pin]()
         
+        DispatchQueue.main.async {
         let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
         
         do {
@@ -98,9 +99,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         } catch {
             
             print("Error in fetch results")
-            
+            }
         }
-        
         return result
         
     }

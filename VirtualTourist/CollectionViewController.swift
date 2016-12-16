@@ -152,6 +152,7 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
                 if data != nil {
                     DispatchQueue.main.async(execute: { () -> Void in
                         let image = UIImage(data: data!)
+                        Client.Caches.imageCache.storeImage(image, withIdentifier: (photoObject.id)!)
                         cell.imageView.image = image
                         cell.activityIndicator.isHidden = true
                         cell.activityIndicator.stopAnimating()
@@ -205,7 +206,8 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
             if pic.pin != nil {
                 
                 sharedContext.delete(pic)
-                
+                Client.Caches.imageCache.deleteImages(pic.id!)
+                CoreDataStackController.sharedInstance().saveContext()
                 print("Photos deleted")
                 
             }
@@ -221,8 +223,7 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
             if self.imagePin.photos == nil {
                 print("No images Found")
                 self.imageInfoLabel.isHidden = true
-                
-            } else {
+                } else {
                 self.imageInfoLabel.isHidden = false
                 print("Images found in Collection")
                 self.collectionView.reloadData()
