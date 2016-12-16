@@ -133,9 +133,7 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         
         // Get reference to PhotoCell object at cell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as! CollectionViewCell
-        //Cleaning the cell
-        //  self.collectionView.deleteItems(at: [indexPath])
-        // configureCell(cell: cell, indexPath: indexPath)
+       
         let photoObject = (fetchedResultsController?.object(at: indexPath))! as Photos
         print("The photos in photoobject are: ",photoObject)
         
@@ -155,7 +153,6 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
                     DispatchQueue.main.async(execute: { () -> Void in
                         let image = UIImage(data: data!)
                         cell.imageView.image = image
-                        //   Client.Caches.imageCache.storeImage(image, withIdentifier: (photoObject.id)!)
                         cell.activityIndicator.isHidden = true
                         cell.activityIndicator.stopAnimating()
                         cell.imageView.isHidden = false
@@ -222,7 +219,6 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
             
             self.perFormFetch()
             if self.imagePin.photos == nil {
-               // self.imageInfoLabel.text = "No Images Found"
                 print("No images Found")
                 self.imageInfoLabel.isHidden = true
                 

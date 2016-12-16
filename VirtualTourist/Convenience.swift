@@ -60,8 +60,6 @@ extension Client {
                     // Dictionary with photos
                     for photoDictionary in photosArray {
                         
-                       // guard let photoURLString = photoDictionary[FlickrResponseKeys.MediumURL] as? String else {
-                          //  print ("error, photoDictionary)"); continue}
                         
                         // Create the Photos model
                         let newPhoto = Photos(dictionary: photoDictionary, pins: pin, context: self.sharedContext)
