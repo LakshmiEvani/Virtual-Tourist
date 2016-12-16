@@ -92,7 +92,7 @@ class Client: NSObject {
         let task = URLSession.shared.dataTask(with: request as URLRequest, completionHandler: {
         (resultData, responseString, errorString) in
         
-        print("Resultdata from downloads: ",resultData)
+        print("Resultdata from downloads: ",resultData!)
         if let error = errorString {
         completionHandler(nil, error as NSError?)
         } else {

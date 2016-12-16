@@ -52,8 +52,8 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         flowLayOut(size: self.view.frame.size)
         
         if imagePin.photos != nil {
-            let nib = UINib(nibName: "CollectionViewCell", bundle: nil)
-            collectionView.register(nib, forCellWithReuseIdentifier: "CollectionViewCell")
+            
+            subView()
         }
         
         let fetchRequest: NSFetchRequest<Photos> =  Photos.fetchRequest()
@@ -65,6 +65,15 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: sharedContext, sectionNameKeyPath: nil, cacheName: nil)
         perFormFetch()
         fetchedResultsController.delegate = self
+        
+    }
+    
+    
+    
+    func subView(){
+        
+        let nib = UINib(nibName: "CollectionViewCell", bundle: nil)
+        collectionView.register(nib, forCellWithReuseIdentifier: "CollectionViewCell")
         
     }
     
@@ -107,11 +116,6 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         flowLayout?.itemSize = CGSize(width: dimension1, height: dimension1)
     }
     
-    func subView(){
-        
-        
-    }
-    
     
     // Collection View DataSource
     
@@ -148,7 +152,7 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
                     DispatchQueue.main.async(execute: { () -> Void in
                         let image = UIImage(data: data!)
                         cell.imageView.image = image
-                        Client.Caches.imageCache.storeImage(image, withIdentifier: (photoObject.id)!)
+                        //   Client.Caches.imageCache.storeImage(image, withIdentifier: (photoObject.id)!)
                         cell.activityIndicator.isHidden = true
                         cell.activityIndicator.stopAnimating()
                         cell.imageView.isHidden = false
@@ -177,15 +181,38 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
     
     func refreshCollection(){
         
-        if self.imagePin.photos == nil {
-            self.collectionView.alpha = 1.0
-            self.imageInfoLabel.text = "No Images Found"
-            self.imageInfoLabel.isHidden = false
+        DispatchQueue.main.async {
             
-        } else {
-            self.collectionView.alpha = 0.0
-            self.imageInfoLabel.isHidden = true
-            self.collectionView.reloadData()
+            if self.imagePin.photos == nil {
+                self.collectionView.alpha = 1.0
+                self.imageInfoLabel.text = "No Images Found"
+                self.imageInfoLabel.isHidden = false
+                
+            } else {
+                self.collectionView.alpha = 0.0
+                self.imageInfoLabel.isHidden = true
+                self.collectionView.reloadData()
+                self.subView()
+            }
+        }
+    }
+    
+    
+    func downloadPhotos(){
+        client.getPhotosFromLocation(pin: imagePin) { (photos, errorString) in
+            if let errorString = errorString {
+                print(errorString)
+            } else {
+                
+                DispatchQueue.main.async {
+                    for image in photos {
+                        print("The image in New Collection:", image)
+                        let photo = Photos(dictionary: image, pins: self.imagePin, context: self.sharedContext)
+                        CoreDataStackController.sharedInstance().saveContext()
+                    }
+                }
+            }
+            
         }
     }
     
@@ -199,36 +226,37 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
             if pic.pin != nil {
                 
                 sharedContext.delete(pic)
-                Client.Caches.imageCache.deleteImages(pic.id!)
+                
                 print("Photos deleted")
-                CoreDataStackController.sharedInstance().saveContext()
+                
             }
             
         }
-        self.refreshCollection()
-        self.collectionView.reloadData()
-     
-        client.getPhotosFromLocation(pin: imagePin) {(photos, errorString) in
+        downloadPhotos()
+        
+        
+        DispatchQueue.main.async {
             
-            if errorString == nil {
-                print("There are no photos")
-                return
+            self.perFormFetch()
+            if self.imagePin.photos == nil {
+                self.imageInfoLabel.text = "No Images Found"
+                print("No images Found")
+                self.imageInfoLabel.isHidden = false
+                
             } else {
-                
-                for photo in photos {
-                    
-                    
-                    Client.Caches.imageCache.imageWithIdentifier(photo.description)
-                    CoreDataStackController.sharedInstance().saveContext()
-                    
-                }
-                    self.collectionView.reloadData()
-                    self.refreshCollection()
-                    self.newCollectionButton.isEnabled = true
-                
+                self.imageInfoLabel.isHidden = true
+                print("Images found in Collection")
+                self.collectionView.reloadData()
+                print("Reloaded collection View")
+                self.subView()
             }
             
+            self.newCollectionButton.isEnabled = true
+            
+            
         }
+        
+        
     }
     
     func setMapViewAnnotation(_ annotation: MKAnnotation) {
