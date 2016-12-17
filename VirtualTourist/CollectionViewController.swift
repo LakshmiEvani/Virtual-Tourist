@@ -174,7 +174,8 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         let photo = fetchedResultsController.object(at: indexPath as IndexPath)
         self.sharedContext.delete(photo)
         CoreDataStackController.sharedInstance().saveContext()
-        
+        //deleting image from UIView
+         newCollectionButton.imageView?.image = nil
     }
     
     
@@ -213,10 +214,10 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
             }
             
         }
-        
-        DispatchQueue.main.async {
+    
             self.downloadPhotos()
-            }
+    
+        
         DispatchQueue.main.async {
             
             self.perFormFetch()

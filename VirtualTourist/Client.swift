@@ -90,19 +90,20 @@ class Client: NSObject {
         let request = NSMutableURLRequest(url: URL(string: urlString)!)
         
         let task = URLSession.shared.dataTask(with: request as URLRequest, completionHandler: {
-        (resultData, responseString, errorString) in
-        
-        print("Resultdata from downloads: ",resultData!)
-        if let error = errorString {
-        completionHandler(nil, error as NSError?)
-        } else {
-        completionHandler(resultData!, nil)
-        }
-        })
-        
-        task.resume()
-        
-        return task
+            (resultData, responseString, errorString) in
+            DispatchQueue.main.async {
+                print("Resultdata from downloads: ",resultData!)
+                if let error = errorString {
+                    completionHandler(nil, error as NSError?)
+                } else {
+                    completionHandler(resultData!, nil)
+                    
+                    }
+                }
+            })
+            task.resume()
+            
+            return task
     }
     
     

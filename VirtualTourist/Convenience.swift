@@ -87,13 +87,15 @@ extension Client {
         
         taskForGETMethod(imageURLString!, completionHandler: { (result, error) in
         
-                // check for failure
+            DispatchQueue.main.async {
+            // check for failure
                 guard error == nil else {
                     completionHandler(nil, error)
                     return
                 }
                 
                 completionHandler(result, nil)
+            }
         })
     }
     
