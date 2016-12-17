@@ -83,7 +83,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "com.apple.CoreData.ConcurrencyDebug1"
+            argument = "com.apple.CoreData.ConcurrencyDebug 1"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

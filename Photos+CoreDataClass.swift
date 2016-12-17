@@ -32,11 +32,11 @@ public class Photos: NSManagedObject {
         id = dictionary["id"] as? String
         url = dictionary["url_m"] as? String
         self.pin = pins
-        try! context.save()
+       try! context.save()
         
     }
     
-    
+     
     //Delete the associated image file when the Photo managed object is deleted.
     
     override public func prepareForDeletion() {

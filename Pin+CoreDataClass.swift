@@ -27,12 +27,6 @@ public class Pin: NSManagedObject {
         longitude = annotationLongitude
         self.pageNumber = 0
     }
-    
-    
-    var sharedContext: NSManagedObjectContext {
-        return CoreDataStackController.sharedInstance().managedObjectContext
-        
-    }
 }
 
 extension Pin {

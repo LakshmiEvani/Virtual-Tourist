@@ -12,9 +12,8 @@ import MapKit
 
 class  CollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, MKMapViewDelegate, NSFetchedResultsControllerDelegate {
     
-    
     // Outlet
-    @IBOutlet var flowLayout: UICollectionViewFlowLayout!
+    @IBOutlet weak var collectionFlowLayOut: UICollectionViewFlowLayout!
     @IBOutlet var collectionView: UICollectionView!
     @IBOutlet weak var photoImageView: UIImageView!
     @IBOutlet weak var mapView: MKMapView!
@@ -48,7 +47,8 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         collectionView.delegate = self
         collectionView.dataSource = self
         initMap()
-        //TODO: Implement flowLayout here.
+        
+        // Implemented flowLayout
         flowLayOut(size: self.view.frame.size)
         
         if imagePin.photos != nil {
@@ -112,9 +112,9 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         let space: CGFloat = 3.0
         let dimension1 = (view.frame.size.height - (2 * space))/3.0
         
-        flowLayout?.minimumInteritemSpacing = space
-        flowLayout?.minimumLineSpacing = space
-        flowLayout?.itemSize = CGSize(width: dimension1, height: dimension1)
+        collectionFlowLayOut?.minimumInteritemSpacing = space
+        collectionFlowLayOut?.minimumLineSpacing = space
+        collectionFlowLayOut?.itemSize = CGSize(width: dimension1, height: dimension1)
     }
     
     
@@ -133,37 +133,48 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         
         // Get reference to PhotoCell object at cell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as! CollectionViewCell
-       
+        
         let photoObject = (fetchedResultsController?.object(at: indexPath))! as Photos
         print("The photos in photoobject are: ",photoObject)
         
+        
         if  photoObject.images != nil {
             
-            let imageURL = URL(string: (photoObject.url)!)
-            let imageData = try? Data(contentsOf: imageURL!)
-            photoImageView = UIImageView(image: UIImage(data: imageData!)!)
-            cell.imageView.image = photoImageView.image
-            cell.imageView.isHidden = false
-            cell.activityIndicator.isHidden = true
-            cell.activityIndicator.stopAnimating()
+            sharedContext.performAndWait {
+                let imageURL = URL(string: (photoObject.url)!)
+                let imageData = try? Data(contentsOf: imageURL!)
+                cell.imageView.image = UIImage(data: imageData!)
+                cell.imageView.isHidden = false
+                cell.activityIndicator.isHidden = true
+                cell.activityIndicator.stopAnimating()
+                
+            }
         } else {
-            cell.imageView.image = UIImage(named: "placeholder")
-            client.downloadPhotoImage((photoObject), completionHandler: { (data, error) in
-                if data != nil {
-                    DispatchQueue.main.async(execute: { () -> Void in
+            
+            sharedContext.performAndWait {
+                cell.imageView.image = UIImage(named: "placeholder")
+                self.client.downloadPhotoImage((photoObject), completionHandler: { (data, error) in
+                    if data != nil {
                         let image = UIImage(data: data!)
                         Client.Caches.imageCache.storeImage(image, withIdentifier: (photoObject.id)!)
                         cell.imageView.image = image
                         cell.activityIndicator.isHidden = true
                         cell.activityIndicator.stopAnimating()
                         cell.imageView.isHidden = false
-                    })
-                } else {
+                        photoObject.images = data! as NSData?
+                        CoreDataStackController.sharedInstance().saveContext()
+                        
+                        
+                    } else {
+                        
+                        print("There is no data",error)
+                    }
                     
-                    print("There is no data",error as Any)
-                }
-            })
+                })
+                
+            }
         }
+        
         
         return cell
         
@@ -174,8 +185,7 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         let photo = fetchedResultsController.object(at: indexPath as IndexPath)
         self.sharedContext.delete(photo)
         CoreDataStackController.sharedInstance().saveContext()
-        //deleting image from UIView
-         newCollectionButton.imageView?.image = nil
+        collectionView.deleteItems(at: [indexPath])
     }
     
     
@@ -186,11 +196,10 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
             if let errorString = errorString {
                 print(errorString)
             } else {
-            
-                    for image in photos {
-                        print("The image in New Collection:", image)
-                        let photo = Photos(dictionary: image, pins: self.imagePin, context: self.sharedContext)
-                        CoreDataStackController.sharedInstance().saveContext()
+                for image in photos {
+                    print("The image in New Collection:", image)
+                    _ = Photos(dictionary: image, pins: self.imagePin, context: self.sharedContext)
+                    CoreDataStackController.sharedInstance().saveContext()
                 }
             }
             
@@ -214,9 +223,9 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
             }
             
         }
-    
-            self.downloadPhotos()
-    
+        
+        self.downloadPhotos()
+        
         
         DispatchQueue.main.async {
             
@@ -224,7 +233,7 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
             if self.imagePin.photos == nil {
                 print("No images Found")
                 self.imageInfoLabel.isHidden = true
-                } else {
+            } else {
                 self.imageInfoLabel.isHidden = false
                 print("Images found in Collection")
                 self.collectionView.reloadData()

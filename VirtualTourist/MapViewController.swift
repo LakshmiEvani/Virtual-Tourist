@@ -89,16 +89,15 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     func getAllPins() -> [Pin] {
         
         var result = [Pin]()
-        
-        DispatchQueue.main.async {
-        let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
-        
-        do {
-            result = try self.sharedContext.fetch(fetchRequest)
+        sharedContext.performAndWait  {
+            let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
             
-        } catch {
-            
-            print("Error in fetch results")
+            do {
+                result = try self.sharedContext.fetch(fetchRequest)
+                
+            } catch {
+                
+                print("Error in fetch results")
             }
         }
         return result
@@ -189,7 +188,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             } else {
                 for image in photos {
                     print("The image is:", image)
-                    let photo = Photos(dictionary: image, pins: pin, context: self.sharedContext)
+                    _ = Photos(dictionary: image, pins: pin, context: self.sharedContext)
                     CoreDataStackController.sharedInstance().saveContext()
                 }
             }
@@ -242,6 +241,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     // This delegate method is implemented to respond to taps on the pin annotation.
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         
+         sharedContext.perform {
         let selectedAnnotation = view.annotation!
         // deselect the pin annotation
         mapView.deselectAnnotation(selectedAnnotation, animated: true)
@@ -258,6 +258,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             }
         }
     }
+}
     
     // Error help function
     func showAlert(_ alertTitle: String, alertMessage: String, actionTitle: String){
