@@ -12,8 +12,17 @@ import UIKit
 
 public class Photos: NSManagedObject {
     
-    override init(entity: NSEntityDescription, insertInto context: NSManagedObjectContext?) {
-        super.init(entity: entity, insertInto: context)
+    convenience init(image: UIImage, context: NSManagedObjectContext){
+        if let ent = NSEntityDescription.entity(forEntityName: "Photos", in: context){
+            self.init( entity: ent, insertInto: context)
+            self.images = UIImagePNGRepresentation(image) as NSData?
+        }else{
+            fatalError("Entity not found.")
+        }
+    }
+    
+    func storeImage() -> UIImage?{
+        return UIImage(data: self.images! as Data)
     }
     
     var getImage:  UIImage?{

@@ -109,11 +109,12 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
     
     func flowLayOut(size:CGSize){
         
+        let sectionInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         let space: CGFloat = 3.0
         let dimension1 = (view.frame.size.height - (2 * space))/3.0
+        collectionFlowLayOut?.minimumInteritemSpacing = 0
+        collectionFlowLayOut?.minimumLineSpacing = 0
         
-        collectionFlowLayOut?.minimumInteritemSpacing = space
-        collectionFlowLayOut?.minimumLineSpacing = space
         collectionFlowLayOut?.itemSize = CGSize(width: dimension1, height: dimension1)
     }
     
@@ -134,6 +135,11 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         // Get reference to PhotoCell object at cell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as! CollectionViewCell
         
+        if indexPath.row < imagePhotos.count  {
+            sharedContext.performAndWait({
+                cell.imageView.image = self.imagePhotos[self.imagePhotos.startIndex.advanced(by: indexPath.row)].storeImage()
+            })
+        }
         let photoObject = (fetchedResultsController?.object(at: indexPath))! as Photos
         print("The photos in photoobject are: ",photoObject)
         
@@ -161,7 +167,7 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
                         cell.activityIndicator.isHidden = true
                         cell.activityIndicator.stopAnimating()
                         cell.imageView.isHidden = false
-                        photoObject.images = data! as NSData?
+                       photoObject.images = data! as NSData?
                         CoreDataStackController.sharedInstance().saveContext()
                         
                         
@@ -183,9 +189,11 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath:IndexPath) {
         
         let photo = fetchedResultsController.object(at: indexPath as IndexPath)
-        self.sharedContext.delete(photo)
+       sharedContext.delete(photo)
         CoreDataStackController.sharedInstance().saveContext()
-        collectionView.deleteItems(at: [indexPath])
+        perFormFetch()
+        collectionView.reloadData()
+    
     }
     
     
@@ -201,6 +209,13 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
                     _ = Photos(dictionary: image, pins: self.imagePin, context: self.sharedContext)
                     CoreDataStackController.sharedInstance().saveContext()
                 }
+                DispatchQueue.main.async {
+                    
+                    print("refresh images")
+                    self.perFormFetch()
+                    self.collectionView.reloadData()
+                }
+                
             }
             
         }
@@ -225,27 +240,6 @@ class  CollectionViewController: UIViewController, UICollectionViewDelegate, UIC
         }
         
         self.downloadPhotos()
-        
-        
-        DispatchQueue.main.async {
-            
-            self.perFormFetch()
-            if self.imagePin.photos == nil {
-                print("No images Found")
-                self.imageInfoLabel.isHidden = true
-            } else {
-                self.imageInfoLabel.isHidden = false
-                print("Images found in Collection")
-                self.collectionView.reloadData()
-                print("Reloaded collection View")
-                self.subView()
-            }
-            
-            self.newCollectionButton.isEnabled = true
-            
-            
-        }
-        
         
     }
     

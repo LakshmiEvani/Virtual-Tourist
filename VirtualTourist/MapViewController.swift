@@ -64,8 +64,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         pins = getAllPins()
         print("Pin count in core data is \(pins.count)")
-        
-        for singlePin in pins{
+      
+        sharedContext.perform {
+        for singlePin in self.pins{
             
             let annotation = MKPointAnnotation()
             let latitude = CLLocationDegrees(singlePin.latitude)
@@ -81,8 +82,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             }
             
         }
-        
     }
+}
     
     //getting all pins from coredata
     
